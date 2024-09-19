@@ -31,11 +31,12 @@ Both steps are executed by the **relayer** as part of the one-signature transact
 
 Let’s consider an example where the user holds **USDT on Ethereum Mainnet** and wishes to swap it for **WBNB on Binance's BNB Chain**. Assume that the relayer has USDT liquidity on both chains. The flow proceeds as follows:
 
-1. The user constructs a batched transaction, sending USDT to the relayer's smart wallet on Ethereum Mainnet.
+1. The user constructs a batched transaction meaning the trasnactions that should happen on chain a and the transactions that should happen on chain B all in one big user Op, Namley sending USDT to the relayer's smart wallet on Ethereum Mainnet (Chain A) and swapping from the relayers USDT liquidity on chain B to WBNB and then sending the WBNB to the users address n chainB.
 2. The relayer runs a **verification protocol**, ensuring that:
    - The user’s USDT balance decreases by the swap amount (plus fees).
    - The relayer's USDT balance increases by the swap amount (plus fees).
-3. Upon successful verification, the relayer executes the destination chain transaction, sending **WBNB from their smart wallet to the user’s smart wallet** on BNB Chain.
+   - if this verification checks out the users wallet will use its private key to generate a Schnorr proof and shared secret and store it as a hash point on the private keys secp curve
+3. Upon successful verification, the relayer executes the destination chain transaction by providing the proof generated from chain A's transactions and getting the Chain B smart wallet do run its recovery algorithm to make sure the addresses match, thus if this is met they sending **WBNB from their smart wallet to the user’s smart wallet** on BNB Chain.
 
 ## Relayer's Role in Cross-Chain Liquidity
 

@@ -78,10 +78,6 @@ contract ECDSAWallet is ECDSAWalletView {
     ECDSAWalletFactory ecdsaFactory = ECDSAWalletFactory(factory.ecdsaFactory());
     bytes32 dataToSign = domainSeperator(walletExec.sigChainID).toTypedDataHash(walletExec.hash());
 
-    bytes32 contractSignature = ecdsaFactory.generateContractSignature(owner(), dataToSign);
-    signedMessages[dataToSign] = abi.encode(address(this), dataToSign, contractSignature);
-    signedMessages2[0] = abi.encode(address(this), dataToSign, contractSignature);
-
     if (walletExec.bridgeOps.length > 0) {
       _call(payable(bridgeVerifier), 0, encodedBridgeDataValidationReq);
     }
@@ -92,11 +88,8 @@ contract ECDSAWallet is ECDSAWalletView {
     ECDSAWalletFactory ecdsaFactory = ECDSAWalletFactory(factory.ecdsaFactory());
     (uint256 blockNumber, uint256 blockTimestamp, bytes32 proof) = abi.decode(_bridgeProof, (uint256, uint256, bytes32));
     bytes32 dataHash = domainSeperator(_walletExec.sigChainID).toTypedDataHash(_walletExec.hash());
-    bytes32 contractSignature = ecdsaFactory.recoverContractSignature(owner(), blockNumber, blockTimestamp, dataHash);
-    bytes memory d = abi.encode(address(this), dataHash, contractSignature);
-    require(proof == keccak256(d), "src chain onchain verification failed");
-    signedMessages[dataHash] = abi.encode(address(this), dataHash, contractSignature);
-    // bytes memory dataToRecover= abi.encode(address(this), dataHash, contractSignature);
+
+    // new signing methid need to finish
   }
 
   function transferFrom(address from, address to, uint160 amount, address token) external onlyWalletSigners {

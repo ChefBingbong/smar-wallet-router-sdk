@@ -216,6 +216,9 @@ importers:
 
   packages/contracts:
     dependencies:
+      '@noble/secp256k1':
+        specifier: ^1.7.1
+        version: 1.7.1
       '@openzeppelin/contracts':
         specifier: ^4.8.0-rc.1
         version: 4.9.6
@@ -243,6 +246,9 @@ importers:
       '@uniswap/permit2-sdk':
         specifier: ^1.2.0
         version: 1.2.0
+      bls-signatures:
+        specifier: ^2.0.3
+        version: 2.0.3
       chalk:
         specifier: 4.1.2
         version: 4.1.2
@@ -261,6 +267,9 @@ importers:
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
+      solidity-math:
+        specifier: ^0.1.0
+        version: 0.1.0
       solmate:
         specifier: ^6.2.0
         version: 6.2.0
@@ -307,9 +316,15 @@ importers:
       '@typechain/hardhat':
         specifier: ^6.1.2
         version: 6.1.6(@ethersproject/abi@5.7.0)(@ethersproject/providers@5.7.2)(@typechain/ethers-v5@10.2.1)(ethers@5.7.2)(hardhat@2.22.2)(typechain@8.3.2)
+      '@types/bn.js':
+        specifier: ^5.1.5
+        version: 5.1.5
       '@types/chai':
         specifier: ^4.2.0
         version: 4.3.14
+      '@types/elliptic':
+        specifier: ^6.4.18
+        version: 6.4.18
       '@types/lodash':
         specifier: ^4.17.0
         version: 4.17.0
@@ -322,9 +337,21 @@ importers:
       '@types/secp256k1':
         specifier: ^4.0.6
         version: 4.0.6
+      bignumber.js:
+        specifier: ^9.1.2
+        version: 9.1.2
+      bn.js:
+        specifier: ^5.2.1
+        version: 5.2.1
       chai:
         specifier: ^4.2.0
         version: 4.4.1
+      curves:
+        specifier: link:@types/noble/curves
+        version: link:@types/noble/curves
+      elliptic:
+        specifier: ^6.5.5
+        version: 6.5.5
       ethers:
         specifier: ^5.4.7
         version: 5.7.2
@@ -338,8 +365,8 @@ importers:
         specifier: ^1.0.8
         version: 1.0.10(hardhat@2.22.2)
       secp256k1:
-        specifier: ^5.0.0
-        version: 5.0.0
+        specifier: link:@noble/curves/secp256k1
+        version: link:@noble/curves/secp256k1
       solhint:
         specifier: ^4.5.4
         version: 4.5.4(typescript@5.4.5)
@@ -5026,7 +5053,6 @@ packages:
 
   /@noble/secp256k1@1.7.1:
     resolution: {integrity: sha512-hOUk6AyBFmqVrv7k5WAw/LpszxVbj9gGN4JRkIX52fdFAj1UA61KXmZDvqVEm+pOyec3+fIeZB02LYa/pWOArw==}
-    dev: true
 
   /@nodelib/fs.scandir@2.1.5:
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -5997,6 +6023,7 @@ packages:
     dependencies:
       is-glob: 4.0.3
       micromatch: 4.0.5
+      napi-wasm: 1.1.0
     dev: false
     bundledDependencies:
       - napi-wasm
@@ -7176,7 +7203,7 @@ packages:
     resolution: {integrity: sha512-N1ZhksgwD3OBlwTv3R6KFEcPojl/W4ElJOeCZdi+vuI5QmTFwLq3OFf2zd2ROpKvxFdgZ6hUpb0dx9bVNEwYCA==}
     dependencies:
       '@noble/curves': 1.2.0
-      '@noble/hashes': 1.3.2
+      '@noble/hashes': 1.3.3
       '@scure/base': 1.1.6
     dev: false
 
@@ -7197,7 +7224,7 @@ packages:
   /@scure/bip39@1.2.1:
     resolution: {integrity: sha512-Z3/Fsz1yr904dduJD0NpiyRHhRYHdcnyh73FZWiV+/qhWi83wNJ3NWolYqCEN+ZWsUz2TWwajJggcRE9r1zUYg==}
     dependencies:
-      '@noble/hashes': 1.3.2
+      '@noble/hashes': 1.3.3
       '@scure/base': 1.1.6
     dev: false
 
@@ -7789,6 +7816,12 @@ packages:
       '@types/ms': 0.7.34
     dev: false
 
+  /@types/elliptic@6.4.18:
+    resolution: {integrity: sha512-UseG6H5vjRiNpQvrhy4VF/JXdA3V/Fp5amvveaL+fs28BZ6xIKJBPnUPRlEaZpysD9MbpfaLi8lbl7PGUAkpWw==}
+    dependencies:
+      '@types/bn.js': 5.1.5
+    dev: true
+
   /@types/eslint-scope@3.7.7:
     resolution: {integrity: sha512-MzMFlSLBqNF2gcHWO0G1vP/YQyfvrxZ0bF+u7mzUdZ1/xK4A4sru+nraZz5i3iEIk1l1uyicaDVTB4QbbEkAYg==}
     dependencies:
@@ -7843,6 +7876,12 @@ packages:
       '@types/level-errors': 3.0.2
       '@types/node': 20.12.7
     dev: true
+
+  /@types/lodash.memoize@4.1.9:
+    resolution: {integrity: sha512-glY1nQuoqX4Ft8Uk+KfJudOD7DQbbEDF6k9XpGncaohW3RW4eSWBlx6AA0fZCrh40tZcQNH4jS/Oc59J6Eq+aw==}
+    dependencies:
+      '@types/lodash': 4.17.0
+    dev: false
 
   /@types/lodash.mergewith@4.6.7:
     resolution: {integrity: sha512-3m+lkO5CLRRYU0fhGRp7zbsGi6+BZj0uTVSwvcKU+nSlhjA9/QRNfuSGnD2mX6hQA7ZbmcCkzk5h4ZYGOtk14A==}
@@ -9753,6 +9792,10 @@ packages:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
     engines: {node: '>=8'}
 
+  /binascii@0.0.2:
+    resolution: {integrity: sha512-rA2CrUl1+6yKrn+XgLs8Hdy18OER1UW146nM+ixzhQXDY+Bd3ySkyIJGwF2a4I45JwbvF1mDL/nWkqBwpOcdBA==}
+    dev: false
+
   /bind-decorator@1.0.11:
     resolution: {integrity: sha512-yzkH0uog6Vv/vQ9+rhSKxecnqGUZHYncg7qS7voz3Q76+TAi1SGiOKk2mlOvusQnFz9Dc4BC/NMkeXu11YgjJg==}
     dev: false
@@ -9784,6 +9827,13 @@ packages:
   /blakejs@1.2.1:
     resolution: {integrity: sha512-QXUSXI3QVc/gJME0dBpXrag1kbzOqCjCX8/b54ntNyW6sjtoqxqRk3LTmXzaJoh71zMsDCjM+47jS7XiwN/+fQ==}
     dev: true
+
+  /bls-signatures@2.0.3:
+    resolution: {integrity: sha512-6hp0od7VJkXthuANiABt+0z3nWbfGBKGu17JrzZR+mg6+hy3hpt1uwZS2xkK2eXwc1pz1jzVeYJxjMKNj4km+A==}
+    dependencies:
+      binascii: 0.0.2
+      core-js: 3.37.1
+    dev: false
 
   /bluebird@3.7.2:
     resolution: {integrity: sha512-XpNj6GDQzdfW+r2Wnn7xiSAd7TM3jzkxGXBGTtWKuSXv1xUV+azxAm8jdWZN06QTQk+2N2XB9jRDkvbmQmcRtg==}
@@ -10370,6 +10420,11 @@ packages:
     resolution: {integrity: sha512-d3BrpyFr5eD4KcbRvQ3FTUx/KWmaDesr7+a3+1+P46IUnNoEt+oiLijPINZMEon7w9oGkIINWxrBAU9DEciwFQ==}
     requiresBuild: true
     dev: true
+
+  /core-js@3.37.1:
+    resolution: {integrity: sha512-Xn6qmxrQZyB0FFY8E3bgRXei3lWDJHhvI+u0q9TKIYM49G8pAr0FgnnrFRAmsbptZL1yxRADVXn+x5AGsbBfyw==}
+    requiresBuild: true
+    dev: false
 
   /core-util-is@1.0.2:
     resolution: {integrity: sha512-3lqz5YjWTYnW6dlDa5TLaTCcShfar1e40rmcJVwCBJC6mWlFuj0eCHIElmG1g5kyuJ/GD+8Wn4FFCcz4gJPfaQ==}
@@ -13839,6 +13894,10 @@ packages:
     resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
     dev: false
 
+  /lodash.memoize@4.1.2:
+    resolution: {integrity: sha512-t7j+NzmgnQzTAYXcsHYLgimltOV1MXHtlOWf6GjL9Kj8GK5FInw5JotxvbOs+IvV1/Dzo04/fCGfLVs7aXb4Ag==}
+    dev: false
+
   /lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
     dev: true
@@ -14218,6 +14277,10 @@ packages:
     dev: true
     optional: true
 
+  /napi-wasm@1.1.0:
+    resolution: {integrity: sha512-lHwIAJbmLSjF9VDRm9GoVOy9AGp3aIvkjv+Kvz9h16QR3uSVYH78PNQUnT2U4X53mhlnV2M7wrhibQ3GHicDmg==}
+    dev: false
+
   /natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
     dev: true
@@ -14290,10 +14353,6 @@ packages:
     requiresBuild: true
     dev: true
     optional: true
-
-  /node-addon-api@5.1.0:
-    resolution: {integrity: sha512-eh0GgfEkpnoWDq+VY8OyvYhFEzBk6jIYbRKdIlyTiAXIVJ8PyBaKb0rp7oDtoddbdoHWhq8wwr+XZ81F1rpNdA==}
-    dev: true
 
   /node-addon-api@7.1.0:
     resolution: {integrity: sha512-mNcltoe1R8o7STTegSOHdnJNN7s5EUvhoS7ShnTHDyOSd+8H+UdWODq6qSv67PjC8Zc5JRT8+oLAMCr0SIXw7g==}
@@ -15970,16 +16029,6 @@ packages:
       node-gyp-build: 4.8.0
     dev: true
 
-  /secp256k1@5.0.0:
-    resolution: {integrity: sha512-TKWX8xvoGHrxVdqbYeZM9w+izTF4b9z3NhSaDkdn81btvuh+ivbIMGT/zQvDtTFWhRlThpoz6LEYTr7n8A5GcA==}
-    engines: {node: '>=14.0.0'}
-    requiresBuild: true
-    dependencies:
-      elliptic: 6.5.5
-      node-addon-api: 5.1.0
-      node-gyp-build: 4.8.0
-    dev: true
-
   /seedrandom@3.0.5:
     resolution: {integrity: sha512-8OwmbklUNzwezjGInmZ+2clQmExQPvomqjL7LFqOYqtmuxRgQYqOD3mHaU+MvZn5FLUeVxVfQjwLZW/n/JFuqg==}
     dev: true
@@ -16257,6 +16306,14 @@ packages:
       shelljs: 0.8.5
       web3-utils: 1.10.4
     dev: true
+
+  /solidity-math@0.1.0:
+    resolution: {integrity: sha512-OeDTkji9xc0LRZeNX+lAnodSO5NissRzUT1WF3MXuB1gsTfz5PNiSQ1x2JwgQz67xJ9XgA9cEfwI1Crm7TuloA==}
+    dependencies:
+      '@types/lodash.memoize': 4.1.9
+      bn.js: 5.2.1
+      lodash.memoize: 4.1.2
+    dev: false
 
   /solmate@6.2.0:
     resolution: {integrity: sha512-AM38ioQ2P8zRsA42zenb9or6OybRjOLXIu3lhIT8rhddUuduCt76pUEuLxOIg9GByGojGz+EbpFdCB6B+QZVVA==}

@@ -16,14 +16,14 @@ dotenv.config();
 const config: HardhatUserConfig = {
   networks: {
     hardhat: {
-      forking: {
-        enabled: true,
-        url: "https://eth.llamarpc.com",
-        blockNumber: 19595025,
-      },
+      // forking: {
+      //   enabled: true,
+      //   url: "https://eth.llamarpc.com",
+      //   blockNumber: 19595025,
+      // },
       gas: 3000000,
       // url: "http://127.0.0.1:8545",
-      // chainId: 31337,
+      chainId: 31337,
     },
     ethereumMainnet: {
       url: "https://mainnet.infura.io/v3/e110322e378a4f268172084e63ac8b8d",
@@ -191,6 +191,17 @@ const config: HardhatUserConfig = {
   },
   solidity: {
     compilers: [
+      {
+        version: "0.4.11",
+        settings: {
+          // evmVersion: "istanbul",
+          viaIR: true,
+          optimizer: {
+            enabled: true,
+            runs: 1000,
+          },
+        },
+      },
       {
         version: "0.8.17",
         settings: {

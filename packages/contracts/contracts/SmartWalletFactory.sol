@@ -6,6 +6,7 @@ import {IWalletFactory} from "./interfaces/IWalletFactory.sol";
 import {IWallet} from "./interfaces/IWallet.sol";
 import {ECDSAWalletState} from "./ECDSAWalletState.sol";
 import {ECDSAWalletFactory} from "./ECDSAWalletFactory.sol";
+import {Schnorr2} from "./crypto/Schnorr.sol";
 import "hardhat/console.sol";
 
 contract SmartWalletFactory is IWalletFactory {
@@ -15,6 +16,7 @@ contract SmartWalletFactory is IWalletFactory {
   address public RELAYER;
 
   ECDSAWalletFactory public ecdsaFactory;
+  Schnorr2 public schnorr;
   bytes32 public priv;
 
   error UnSupportedFeeAsset(string message);
@@ -25,7 +27,7 @@ contract SmartWalletFactory is IWalletFactory {
 
   event WalletCreated(address indexed _wallet, bytes32 indexed _callID);
 
-  constructor(address _pancakeV2Factory, address _pancakeV3Factory, address _weth9, address[] memory _initialFeeAssets) {
+  constructor(Schnorr2 _schnorr, address _pancakeV2Factory, address _pancakeV3Factory, address _weth9, address[] memory _initialFeeAssets) {
     WETH9 = _weth9;
     PANCAKE_V2_FACTORY = _pancakeV2Factory;
     PANCAKE_V3_FACTORY = _pancakeV3Factory;
@@ -34,15 +36,15 @@ contract SmartWalletFactory is IWalletFactory {
       supportedFeeAssets[_initialFeeAssets[i]] = true;
     }
     RELAYER = msg.sender;
+    schnorr = _schnorr;
   }
 
-  function createWallet(address _impl, bytes memory _call) external payable returns (IWallet) {
+  function createWallet(address _impl, uint256[2] memory pubkey, bytes memory _call) external payable returns (IWallet) {
     bytes32 callID = keccak256(_call);
-    // salt is derived from call hash and nonce, this is to allow the same user to
-    // create and control multiple SmartWallets with the same private key
-    ERC1967Proxy wallet_ = new ERC1967Proxy{salt: keccak256(abi.encode(callID, nonces[callID]++))}(address(_impl), _call);
-    priv = keccak256(abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(_impl, _call)));
-    console.logBytes32(priv);
+    (uint256 derivedX, uint256 derivedY) = schnorr.PubDerive(pubkey, nonces[callID]++);
+    bytes32 salt = keccak256(abi.encodePacked(derivedX, derivedY));
+    ERC1967Proxy wallet_ = new ERC1967Proxy{salt: salt}(address(_impl), _call);
+
     emit WalletCreated(address(wallet_), callID);
     IWallet wallet = IWallet(payable(wallet_));
 
@@ -51,17 +53,18 @@ contract SmartWalletFactory is IWalletFactory {
     return wallet;
   }
 
-  function walletAddress(address _impl, bytes memory _call, uint256 _nonce) public view returns (address) {
-    bytes32 callID = keccak256(_call);
+  function walletAddress(address _impl, uint256[2] memory pubkey, bytes memory _call, uint256 _nonce) public view returns (address) {
+    (uint256 derivedX, uint256 derivedY) = schnorr.PubDerive(pubkey, _nonce);
+    bytes32 salt = keccak256(abi.encodePacked(derivedX, derivedY));
     return
       address(
         uint160(
-          uint(
+          uint256(
             keccak256(
               abi.encodePacked(
                 bytes1(0xff),
                 address(this),
-                keccak256(abi.encode(callID, _nonce)),
+                salt,
                 keccak256(abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(_impl, _call)))
               )
             )

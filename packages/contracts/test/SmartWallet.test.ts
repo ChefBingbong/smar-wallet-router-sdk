@@ -1,141 +1,61 @@
+import { keccak256 } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { expect } from "chai";
-// import { it } from "mocha";
-// import { SmartWallet, SmartWalletFactory, ABC, XYZ } from "../../typechain-types";
-import type {
-     SmartWallet,
-     SmartWalletFactory,
-     ABC,
-     XYZ,
-     ECDSAWalletFactory,
-     ECDSAWalletFactory__factory,
-     SmartWalletFactory__factory,
-     IWallet,
-     ECDSAWallet,
-} from "../typechain-types";
-import { UserOp, sign } from "./utils/sign";
+import * as secp from "@noble/secp256k1";
+// Generate a private key
+const privateKey = secp.utils.randomPrivateKey();
+console.log("Private Key:", ethers.utils.hexlify(privateKey));
 
-describe.skip("SmartWallet", () => {
-     // Users
-     let ALICE: SignerWithAddress;
-     let BOB: SignerWithAddress;
+// Generate a public key
+const publicKey = secp.Point.fromHex(secp.getPublicKey(privateKey));
+console.log("Public Key:", ethers.utils.hexlify(secp.getPublicKey(privateKey)));
 
-     // Owner
-     let OWNER: SignerWithAddress;
+describe.skip("Factory", function () {
+  it("should deploy a contract to a predetermined address using CREATE2", async function () {
+    // Compile and deploy the Factory contract
+    const Factory = await ethers.getContractFactory("Factory");
+    const factory = await Factory.deploy();
+    await factory.deployed();
 
-     // Forwarder
-     let factory: ECDSAWalletFactory;
-     let wallet: ECDSAWalletFactory;
+    console.log("Factory deployed to:", factory.address);
 
-     // Wallets
-     let aliceWallet: ECDSAWallet;
-     let bobWallet: ECDSAWallet;
+    // Your contract bytecode (example: a simple contract)
+    const SimpleStorage = await ethers.getContractFactory("SimpleStorage");
+    const simpleStorageBytecode = SimpleStorage.bytecode;
 
-     let abc: ABC;
-     let xyz: XYZ;
+    // Generate private key and derive public key and address
+    //     const wallet = ethers.Wallet.createRandom();
+    //     const privateKey = wallet.privateKey;
+    //     const derivedAddress = wallet.address;
+    console.log(
+      "Derived Address:",
+      ethers.utils.computeAddress(ethers.utils.hexlify(privateKey)),
+    );
 
-     before(async () => {
-          [OWNER, ALICE, BOB] = await ethers.getSigners();
+    // Chosen nonce
+    const nonce = ethers.utils.randomBytes(32); // Random nonce for demonstration
 
-          console.log("owner", OWNER.address);
-          console.log("ALICE", ALICE.address);
+    // Derive salt from private key and nonce using PrivDerive
+    const derivedSalt = await factory.PubDerive(
+      [BigInt(publicKey.x), BigInt(publicKey.y)],
+      keccak256(simpleStorageBytecode),
+    );
+    console.log("Derived Salt:", derivedSalt);
 
-          // deploy token
-          const ABC = await ethers.getContractFactory("ABC");
-          abc = (await ABC.deploy()) as ABC;
-          await abc.deployed();
+    // Compute the address
+    const computedAddress = await factory.computeAddress(
+      simpleStorageBytecode,
+      "0x" + secp.utils.bytesToHex(privateKey),
+    );
+    console.log("Computed address:", computedAddress);
 
-          // deploy XYZ
-          const XYZ = await ethers.getContractFactory("XYZ");
-          xyz = (await XYZ.deploy()) as XYZ;
-          await xyz.deployed();
+    // Deploy the contract
+    const tx = await factory.deploy(simpleStorageBytecode, derivedSalt);
+    await tx.wait();
 
-          // deploy Wallet implementation
-          const Wallet = (await ethers.getContractFactory("SmartWalletFactory")) as SmartWalletFactory__factory;
-          const wallet = await Wallet.connect(OWNER).deploy();
-          await wallet.connect(OWNER).deployed();
+    console.log("Contract deployed at:", computedAddress);
 
-          // await wallet.(OWNER.address);
-
-          // deploy WalletFactory
-          const WalletFactory = (await ethers.getContractFactory("ECDSAWalletFactory")) as ECDSAWalletFactory__factory;
-          factory = await WalletFactory.connect(OWNER).deploy(wallet.address);
-          await factory.connect(OWNER).deployed();
-
-          console.log("FACTORY", wallet.address);
-          console.log("ECDSAFACTORY", factory.address);
-          console.log("ABC", abc.address);
-
-          // Setup user accounts
-          await abc.transfer(ALICE.address, "100000000000000000000");
-          await xyz.transfer(ALICE.address, "1000000000000000000000000");
-     });
-
-     // ----- UPDATE PARNER -----
-     it("User should be able to create a wallet for themselves.", async () => {
-          const aliceWalletAddress = await factory.walletAddress(OWNER.address, 0);
-          await factory.createWallet(OWNER.address);
-          aliceWallet = (await ethers.getContractAt("ECDSAWallet", aliceWalletAddress)) as ECDSAWallet;
-          expect(await aliceWallet.owner()).to.equal(OWNER.address);
-     });
-
-     // it("User should be able to create a wallet for someone else.", async () => {
-     //       await factory.connect(ALICE).createWallet(BOB.address);
-     //       const bobWalletAddress = await factory.walletAddress(BOB.address, 0);
-     //       bobWallet = (await ethers.getContractAt(
-     //             "ECDSAWallet",
-     //             bobWalletAddress
-     //       )) as ECDSAWallet;
-     //       expect(await bobWallet.owner()).to.equal(BOB.address);
-     // });
-
-     it("User should be able to do any call through the wallet.", async () => {
-          await abc.connect(ALICE).transfer(aliceWallet.address, "100000000");
-          expect(await abc.balanceOf(aliceWallet.address)).to.equal("100000000");
-          const tx = await abc.populateTransaction.transfer(ALICE.address, "100000000");
-          await aliceWallet.connect(ALICE).call(abc.address, tx.data!);
-          expect(await abc.balanceOf(aliceWallet.address)).to.equal("0");
-     });
-
-     // it("User should be able to send funds to the wallet before and after creation.", async () => {
-     //       const aliceNewWalletAddr = await factory.wallet(ALICE.address, 1);
-     //       await ALICE.sendTransaction({
-     //             to: aliceNewWalletAddr,
-     //             value: "100000000",
-     //       });
-     //       await abc.connect(ALICE).transfer(aliceNewWalletAddr, "100000000");
-     //       expect(await abc.balanceOf(aliceNewWalletAddr)).to.equal("100000000");
-     //       expect(await ethers.provider.getBalance(aliceNewWalletAddr)).to.equal(
-     //             "100000000"
-     //       );
-     //       await factory.connect(ALICE).createWallet(ALICE.address);
-     //       await ALICE.sendTransaction({
-     //             to: aliceNewWalletAddr,
-     //             value: "100000000",
-     //       });
-     //       await abc.connect(ALICE).transfer(aliceNewWalletAddr, "100000000");
-     //       expect(await abc.balanceOf(aliceNewWalletAddr)).to.equal("200000000");
-     //       expect(await ethers.provider.getBalance(aliceNewWalletAddr)).to.equal(
-     //             "200000000"
-     //       );
-
-     //       const aliceNewWallet = (await ethers.getContractAt(
-     //             "SmartWallet",
-     //             aliceNewWalletAddr
-     //       )) as SmartWallet;
-     //       const tx = await abc.populateTransaction.transfer(
-     //             ALICE.address,
-     //             "200000000"
-     //       );
-     //       await aliceNewWallet.connect(ALICE).call(abc.address, tx.data!);
-     //       await aliceNewWallet
-     //             .connect(ALICE)
-     //             .callWithValue(ALICE.address, "200000000", "0x");
-
-     //       expect(await abc.balanceOf(aliceNewWalletAddr)).to.equal("0");
-     //       expect(await ethers.provider.getBalance(aliceNewWalletAddr)).to.equal(
-     //             "0"
-     //       );
-     // });
+    // Check that the contract is deployed at the computed address
+    const code = await ethers.provider.getCode(computedAddress);
+    expect(code).to.not.equal("0x");
+  });
 });

@@ -1,6 +1,48 @@
 # Smart Wallet Router SDK
+## Note This Repo Is Still a WIP
 
 This SDK extends the PancakeSwap Universl and Swap routers for enbling users to execute batched transactions from an abstracted smart contract wallet contract. This enables users to make advanced trades on pancakeswap such as custom gas fee token trades.
+
+## Built-in Smart Wallet with Account Abstraction
+
+Users have their own **built-in smart wallet** that utilizes account abstraction primitives and cryptographic protocols, such as **Schnorr Proof of Knowledge**. This leverages **zero-knowledge (ZK) proofs** in smart contracts to extend modern **Automated Market Maker (AMM)** protocols, like those used by **Uniswap** and **Pancakeswap**.
+
+By incorporating these advancements, users benefit from features like **transaction batching** and the ability to pay **custom fee tokens**. This optimizes the typical swap flow seen in today's AMMs into a streamlined **one-signature flow**. Additionally, it enables **one-signature cross-chain trades** secured by the ZK protocol.
+
+## Deterministic Smart Wallet Contracts
+
+The core idea is to create a **smart wallet contract** for each user with a **deterministic address**. This smart wallet serves as a vessel for executing swap transactions via a relayer.
+
+Since the wallet contract’s address is deterministic, users can deploy it on any chain to execute transactions in a single flow. Additionally, users can generate a **unique private/public key pair** for their wallet contract. The wallet can then implement its own **ECDSA signature** for on-chain signing and ZK proof algorithms.
+
+- The **private key** is derived in secret off-chain.
+- The **public key** is used as the salt in the deterministic **CREATE2 smart contract address**.
+
+This architecture links the user's **Externally Owned Account (EOA)**, smart contract wallet, and public key in an intrinsic relationship.
+
+## Cross-Chain Swap in One-Signature Flow
+
+One of the key features of this design is the ability to execute **cross-chain swaps** with a **one-signature flow**. This involves a two-step process under the hood:
+1. An **origin chain transaction**.
+2. A **destination chain transaction**.
+
+Both steps are executed by the **relayer** as part of the one-signature transaction flow.
+
+## Example: USDT to WBNB Cross-Chain Swap
+
+Let’s consider an example where the user holds **USDT on Ethereum Mainnet** and wishes to swap it for **WBNB on Binance's BNB Chain**. Assume that the relayer has USDT liquidity on both chains. The flow proceeds as follows:
+
+1. The user constructs a batched transaction meaning the trasnactions that should happen on chain a and the transactions that should happen on chain B all in one big user Op, Namley sending USDT to the relayer's smart wallet on Ethereum Mainnet (Chain A) and swapping from the relayers USDT liquidity on chain B to WBNB and then sending the WBNB to the users address n chainB.
+2. The relayer runs a **verification protocol**, ensuring that:
+   - The user’s USDT balance decreases by the swap amount (plus fees).
+   - The relayer's USDT balance increases by the swap amount (plus fees).
+   - if this verification checks out the users wallet will use its private key to generate a Schnorr proof and shared secret and store it as a hash point on the private keys secp curve
+3. Upon successful verification, the relayer executes the destination chain transaction by providing the proof generated from chain A's transactions and getting the Chain B smart wallet do run its recovery algorithm to make sure the addresses match, thus if this is met they sending **WBNB from their smart wallet to the user’s smart wallet** on BNB Chain.
+
+## Relayer's Role in Cross-Chain Liquidity
+
+In this setup, the **relayer** acts as the **source of liquidity** across all chains for cross-chain swaps. USDT serves as the gateway asset for liquidity on all supported chains. The relayer’s net USDT balance across chains remains constant, as funds used for the destination chain transaction are balanced by the funds received from the user on the origin chain.
+
 
 ### Batched transactions
 The Smart Wallet is a smart contract router that the user can manage. the relayer of the wallet factory executes the users contract calls through signature bsed verification. 

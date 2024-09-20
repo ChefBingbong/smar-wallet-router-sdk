@@ -91,10 +91,10 @@ abstract contract ECDSAWalletView is ECDSAWalletState {
       if (signedMsg.length == 0) revert("no data");
 
       ECDSAWalletFactory ecdsaFactory = ECDSAWalletFactory(factory.ecdsaFactory());
-      bytes32 contractSignature = ecdsaFactory.recoverContractSignature(owner(), block.number, block.timestamp, _dataHash);
+      // bytes32 contractSignature = ecdsaFactory.recoverContractSignature(owner(), block.number, block.timestamp, _dataHash);
       (address signer, bytes32 signedData, bytes32 signature) = abi.decode(signedMsg, (address, bytes32, bytes32));
 
-      if (signer != msg.sender || signature != contractSignature || signedData != _dataHash) revert("invalid smart contract sig");
+      if (signer != msg.sender || signedData != _dataHash) revert("invalid smart contract sig");
     }
     return EIP1271_MAGIC_VALUEE;
   }

@@ -25,6 +25,7 @@ import {
   PQR,
   ICALLER__factory,
   CALLER__factory,
+  Schnorr2__factory,
 } from "../typechain-types";
 import { TxType, sign, signMessage } from "./utils/sign";
 import type { AllowanceOp, UserOp } from "./utils/sign";
@@ -59,8 +60,9 @@ import {
   buildSignature,
   buildSignatureBytes,
 } from "./utils/buildSignatures";
+import { Schnorr2 } from "../typechain-types/contracts/Deployer.sol";
 
-describe.skip("Permit2 Signature Transfer", () => {
+describe.skip("Schnorr signer", () => {
   // const PERMIT2_ADDRESS = getPermit2Address(97);
   let OWNER: SignerWithAddress;
   let BOB: SignerWithAddress;
@@ -71,6 +73,7 @@ describe.skip("Permit2 Signature Transfer", () => {
   // Forwarder
   let factory: ECDSAWalletFactory;
   let bridgeVerifier: WalletBridgeVerifier;
+  let schnorr: Schnorr2;
 
   // Wallets
   let aliceWallet: ECDSAWallet;
@@ -85,6 +88,13 @@ describe.skip("Permit2 Signature Transfer", () => {
     [OWNER, ALICE, BOB] = await ethers.getSigners();
 
     await deployERC20();
+
+    const Schnorr = (await ethers.getContractFactory(
+      "Schnorr2",
+    )) as Schnorr2__factory;
+
+    schnorr = await Schnorr.connect(OWNER).deploy();
+    await schnorr.deployed();
 
     const AMM = (await ethers.getContractFactory(
       "AMMSwap",
@@ -105,6 +115,7 @@ describe.skip("Permit2 Signature Transfer", () => {
     )) as SmartWalletFactory__factory;
 
     wallet = await Wallet.connect(OWNER).deploy(
+      schnorr.address,
       weth.address,
       amm.address,
       amm.address,
@@ -152,26 +163,34 @@ describe.skip("Permit2 Signature Transfer", () => {
   // ----- UPDATE PARNER -----
   it("User should be able to create a wallet for themselves.", async () => {
     const alicewalletAddress = await factory.walletAddress(
+      [
+        BigInt(
+          84284270271297656433601178168022578829048976534976517467395189321973636294832n,
+        ),
+        BigInt(
+          96998702249865025088052574999571193287198489460179910867321993813776155833588n,
+        ),
+      ],
       ALICE.address,
       0,
-      keccak256(
-        "0x04ba5734d8f7091719471e7f7ed6b9df170dc70cc661ca05e688601ad984f068b0d67351e5f06073092499336ab0839ef8a521afd334e53807205fa2f08eec74f4",
-      ),
-
-      [],
     );
     console.log(alicewalletAddress, "al");
-    await factory
-      .connect(ALICE)
-      .createWallet(
-        ALICE.address,
-        keccak256(
-          "0x04ba5734d8f7091719471e7f7ed6b9df170dc70cc661ca05e688601ad984f068b0d67351e5f06073092499336ab0839ef8a521afd334e53807205fa2f08eec74f4",
+    await factory.connect(ALICE).createWallet(
+      [
+        BigInt(
+          84284270271297656433601178168022578829048976534976517467395189321973636294832n,
         ),
-        { value: 15000000000 },
-      );
+        BigInt(
+          96998702249865025088052574999571193287198489460179910867321993813776155833588n,
+        ),
+      ],
+      ALICE.address,
+
+      { value: 15000000000 },
+    );
 
     aliceWallet = await ECDSAWallet__factory.connect(alicewalletAddress, ALICE);
+    console.log(aliceWallet.address);
     expect(await aliceWallet.owner()).to.equal(ALICE.address);
   });
 

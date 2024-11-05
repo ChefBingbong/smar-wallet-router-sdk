@@ -1,7 +1,7 @@
 # Smart Wallet Router SDK
 ## Note This Repo Is Still a WIP (MAIN BRANCH IS FEAT: BLS (SEE MOST RECENT PULL REQUEST)
 
-This SDK extends the PancakeSwap Universl and Swap routers for enbling users to execute batched transactions from an abstracted smart contract wallet contract. This enables users to make advanced trades on pancakeswap such as custom gas fee token trades.
+This SDK extends the PancakeSwap Universl and Swap routers for enabling users to execute batched transactions from an abstracted smart contract wallet contract. This enables users to make advanced trades on pancakeswap such as custom gas fee token trades aswell as the novel use of SC ZKPs to allow one singature bridge swaps (read below for more on this)
 
 ## Built-in Smart Wallet with Account Abstraction
 
